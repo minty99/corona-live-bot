@@ -21,7 +21,6 @@ class Crawler:
         driver.get("https://www.corona-live.com/")
         time.sleep(10)
         html = driver.page_source
-        driver.quit()
         soup = BeautifulSoup(html, "html.parser")
         new_patients = soup.select(
             "#root > div > div.sc-AxjAm.bRuiNy.sc-AxirZ.fZVwIW.sc-AxiKw.eSbheu > div:nth-child(3) > div.sc-AxjAm.fiWmrI.sc-AxirZ.heBhHx.sc-AxiKw.eSbheu > div.sc-AxjAm.hQNuxH.sc-AxirZ.idrxEV.sc-AxiKw.eSbheu > div.sc-AxjAm.lklBhC > span"
@@ -36,10 +35,10 @@ class Crawler:
             curr_time = datetime.today().strftime("%Y.%m.%d %H:%M")
             print(f"{curr_time}: {curr}")
             if self.latest < curr:
-                await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr} (+{diff})")
+                await self.worker.test_send(msg=f"{curr_time} 확진자 수 변동: {curr} (+{diff})")
                 self.latest = curr
 
             if self.latest > curr:
-                await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr}")
+                await self.worker.test_send(msg=f"{curr_time} 확진자 수 변동: {curr}")
                 self.latest = curr
             await asyncio.sleep(600)
