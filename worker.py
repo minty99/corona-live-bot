@@ -12,8 +12,10 @@ class Worker:
 
         self.test_channel = self.minty_botworld.channels[2]
 
-    async def send(self, channel, msg):
+    async def send(self, msg, channel=None):
+        if channel is None:
+            channel = self.maple_channel
         await channel.send(msg)
 
-    async def test_send(self, channel, msg):
+    async def test_send(self, msg):
         await self.test_channel.send(msg)

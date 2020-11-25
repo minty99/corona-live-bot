@@ -1,24 +1,19 @@
 import discord
-import schedule
 from worker import Worker
+from crawler import Crawler
 
 client = discord.Client()
+worker = None
+crawler = None
 
 
 @client.event
 async def on_ready():
-    global worker
+    global worker, crawler
     print(f"We have logged in as {client.user}")
     worker = Worker(client)
-
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    if message.content.startswith("!debug"):
-        await worker.test_send(message.channel, "debugging here!")
+    crawler = Crawler(worker)
+    client.loop.create_task(crawler.run())
 
 
 with open("token.txt", "r") as f:
