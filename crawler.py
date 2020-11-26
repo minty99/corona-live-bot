@@ -40,10 +40,10 @@ class Crawler:
             curr_time = datetime.today().strftime("%Y.%m.%d %H:%M")
             print(f"{curr_time}: {curr}")
             if self.latest < curr:
-                await self.worker.test_send(msg=f"{curr_time} 확진자 수 변동: {curr} (+{diff})")
+                await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr} (+{diff})")
                 self.latest = curr
 
             if self.latest > curr:
-                await self.worker.test_send(msg=f"{curr_time} 확진자 수 변동: {curr}")
+                await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr}")
                 self.latest = curr
             await asyncio.sleep(600)
