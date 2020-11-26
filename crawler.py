@@ -15,7 +15,7 @@ driver = webdriver.Chrome("./chromedriver", chrome_options=options)
 class Crawler:
     def __init__(self, worker: Worker):
         self.worker = worker
-        self.latest = self._get_current()
+        self.latest = 0
 
     def _get_current(self):
         driver.get("https://www.corona-live.com/")
