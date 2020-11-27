@@ -19,19 +19,18 @@ class Crawler:
 
     def _get_current(self):
         driver.get("https://www.corona-live.com/")
-        while True:
-            try:
-                time.sleep(10)
-                html = driver.page_source
-                soup = BeautifulSoup(html, "html.parser")
-                new_patients = soup.select(
-                    "#root > div > div.sc-AxjAm.bRuiNy.sc-AxirZ.fZVwIW.sc-AxiKw.eSbheu > div:nth-child(3) > div.sc-AxjAm.fiWmrI.sc-AxirZ.heBhHx.sc-AxiKw.eSbheu > div.sc-AxjAm.hQNuxH.sc-AxirZ.idrxEV.sc-AxiKw.eSbheu > div.sc-AxjAm.lklBhC > span"
-                )
-                curr = int(new_patients[0].text)
-            except Exception:
-                continue
-            break
-        return curr
+        try:
+            time.sleep(10)
+            html = driver.page_source
+            soup = BeautifulSoup(html, "html.parser")
+            new_patients = soup.select(
+                "#root > div > div.sc-AxjAm.bRuiNy.sc-AxirZ.fZVwIW.sc-AxiKw.eSbheu > div:nth-child(3) > div.sc-AxjAm.fiWmrI.sc-AxirZ.heBhHx.sc-AxiKw.eSbheu > div.sc-AxjAm.hQNuxH.sc-AxirZ.idrxEV.sc-AxiKw.eSbheu > div.sc-AxjAm.lklBhC > span"
+            )
+            curr = int(new_patients[0].text)
+            return curr
+        except Exception as e:
+            print(e)
+            return self.latest
 
     async def run(self):
         while True:
