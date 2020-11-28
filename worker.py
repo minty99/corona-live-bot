@@ -26,4 +26,7 @@ class Worker:
 
     async def delete_latest(self):
         if self.latest_message is not None:
-            await self.latest_message.delete()
+            try:
+                await self.latest_message.delete()
+            except Exception:
+                self.latest_message = None
