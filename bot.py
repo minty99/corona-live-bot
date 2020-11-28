@@ -11,9 +11,10 @@ crawler = None
 async def on_ready():
     global worker, crawler
     print(f"We have logged in as {client.user}")
-    worker = Worker(client)
-    crawler = Crawler(worker)
-    client.loop.create_task(crawler.run())
+    if worker is None:
+        worker = Worker(client)
+        crawler = Crawler(worker)
+        client.loop.create_task(crawler.run())
 
 
 with open("token.txt", "r") as f:

@@ -35,15 +35,17 @@ class Crawler:
                 diff = curr - self.latest
                 print(f"{curr_time}: {curr}")
                 if self.latest < curr:
+                    await self.worker.delete_latest()
                     await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr} (+{diff})")
                     self.latest = curr
                 if self.latest > curr:
+                    await self.worker.delete_latest()
                     await self.worker.send(msg=f"{curr_time} 확진자 수 변동: {curr}")
                     self.latest = curr
             except Exception:
                 err = traceback.format_exc()
                 print(err)
-                await self.worker.test_send(msg="@here corona-live-bot error!")
+                await self.worker.test_send(msg=f"{curr_time} corona-live-bot error!")
                 await self.worker.test_send(msg=f"{err}")
 
             await asyncio.sleep(600)
