@@ -48,4 +48,4 @@ class Crawler:
                 await self.worker.test_send(msg=f"{curr_time} corona-live-bot error!")
                 await self.worker.test_send(msg=f"{err}")
 
-            await asyncio.sleep(600)
+            await asyncio.sleep(3600)
