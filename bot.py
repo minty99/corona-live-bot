@@ -1,6 +1,7 @@
+from kdca_crawler import KdcaCrawler
 import discord
 from worker import Worker
-from crawler import Crawler
+from corona_live_crawler import CoronaLiveCrawler
 
 client = discord.Client()
 worker = None
@@ -12,9 +13,10 @@ async def on_ready():
     global worker, crawler
     print(f"We have logged in as {client.user}")
     if worker is None:
-        worker = Worker(client)
-        crawler = Crawler(worker)
-        client.loop.create_task(crawler.run())
+        corona_live_crawler = CoronaLiveCrawler(Worker(client))
+        client.loop.create_task(corona_live_crawler.run())
+        kdca_crawler = KdcaCrawler(Worker(client))
+        client.loop.create_task(kdca_crawler.run())
 
 
 with open("token.txt", "r") as f:
