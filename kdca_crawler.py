@@ -63,14 +63,19 @@ class KdcaCrawler:
         raise "[KdcaCrawler] Failed to fetch today's official announcement."
 
     async def run(self):
+        if datetime.today().hour < 9:
+            today_9am = datetime.today()
+            today_9am = today_9am.replace(hour=9, minute=0, second=0, microsecond=0)
+            sleep_sec = (today_9am - datetime.today()).total_seconds() + 1
+            print(f"[KdcaCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
+            await asyncio.sleep(sleep_sec)
+
         while True:
             today = datetime.today()
             yesterday = (today - timedelta(days=1)).strftime("%Y.%m.%d")
             try:
                 new_domestic, new_foreign, cum_total, cum_foreign = await self._get_current(
-                    # today.month, today.day
-                    12,
-                    9,
+                    today.month, today.day
                 )
                 new_total = new_domestic + new_foreign
                 print(
