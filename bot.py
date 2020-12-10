@@ -4,15 +4,15 @@ from worker import Worker
 from corona_live_crawler import CoronaLiveCrawler
 
 client = discord.Client()
-worker = None
-crawler = None
+first_run = True
 
 
 @client.event
 async def on_ready():
-    global worker, crawler
+    global first_run
     print(f"We have logged in as {client.user}")
-    if worker is None:
+    if first_run:
+        first_run = False
         corona_live_crawler = CoronaLiveCrawler(Worker(client))
         client.loop.create_task(corona_live_crawler.run())
         kdca_crawler = KdcaCrawler(Worker(client))
