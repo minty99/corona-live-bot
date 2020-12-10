@@ -18,9 +18,9 @@ class CoronaLiveCrawler:
         self.worker = worker
         self.latest = 0
 
-    def _get_current(self):
+    async def _get_current(self):
         driver.get("https://www.corona-live.com/")
-        time.sleep(10)
+        await asyncio.sleep(10)
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         div = soup.find_all(name="div", text="실시간 확진자수")
@@ -31,7 +31,7 @@ class CoronaLiveCrawler:
         while True:
             curr_time = datetime.today().strftime("%H:%M")
             try:
-                curr = self._get_current()
+                curr = await self._get_current()
                 diff = curr - self.latest
                 print(f"{curr_time}: {curr}")
                 if self.latest < curr:
