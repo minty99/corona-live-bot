@@ -32,7 +32,7 @@ class KdcaCrawler:
                     answer_idx = idx * 2 + 1
                     break
             if answer_idx == -1:
-                asyncio.sleep(30)
+                await asyncio.sleep(30)
                 continue
             target_page = driver.find_element_by_css_selector(
                 f"#listView > ul:nth-child({answer_idx}) > li.title.title2 > a"
@@ -57,7 +57,7 @@ class KdcaCrawler:
                     ]
                     break
             else:
-                asyncio.sleep(30)
+                await asyncio.sleep(30)
                 continue
             return new_domestic, new_foreign, cum_total, cum_foreign
         raise "[KdcaCrawler] Failed to fetch today's official announcement."
