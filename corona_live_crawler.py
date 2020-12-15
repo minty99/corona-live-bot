@@ -24,23 +24,30 @@ class CoronaLiveCrawler:
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         div = soup.find_all(name="div", text="실시간 확진자수")
-        curr = int(div[0].parent.contents[1].contents[0].contents[0].text)
-        return curr
+        curr = int(div[0].parent.contents[1].contents[0].contents[0].text.replace(",", ""))
+        delta = int(div[0].parent.contents[1].contents[2].text.replace(",", ""))
+        if delta >= 0:
+            delta = "+" + str(delta)
+        else:
+            delta = str(delta)
+        return curr, delta
 
     async def run(self):
         while True:
             curr_time = datetime.today().strftime("%H:%M")
             try:
-                curr = await self._get_current()
+                curr, delta = await self._get_current()
                 diff = curr - self.latest
                 print(f"{curr_time}: {curr}")
                 if self.latest < curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: *{curr}* (+{diff})")
+                    await self.worker.send(
+                        msg=f"[Realtime] 확진자 수 변동: *{curr}* (+{diff}) (어제 대비 {delta})"
+                    )
                     self.latest = curr
                 if self.latest > curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: {curr}")
+                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: *{curr}* (어제 대비 {delta}")
                     self.latest = curr
             except Exception:
                 err = traceback.format_exc()
