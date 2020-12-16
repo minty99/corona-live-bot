@@ -47,7 +47,7 @@ class CoronaLiveCrawler:
                     self.latest = curr
                 if self.latest > curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: *{curr}* (어제 대비 {delta}")
+                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: *{curr}* (어제 대비 {delta})")
                     self.latest = curr
             except Exception:
                 err = traceback.format_exc()
