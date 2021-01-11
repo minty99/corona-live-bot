@@ -26,11 +26,23 @@ class KdcaCrawler:
             items = [
                 item.text for item in soup.select(f"#listView > ul > li.title.title2 > a > span")
             ]
+
             answer_idx = -1
             for idx, item in enumerate(items):
-                if "0시" in item and f"{month}월" in item and f"{day}일" in item:
+                if "0시" not in item:
+                    continue
+                ok = False
+                if f"{month}월" in item and f"{day}일" in item:
+                    ok = True
+                if f"{month}.{day}" in item:
+                    ok = True
+                if f"{month}.{day:02d}" in item:
+                    ok = True
+
+                if ok:
                     answer_idx = idx * 2 + 1
                     break
+
             if answer_idx == -1:
                 await asyncio.sleep(30)
                 continue
