@@ -25,15 +25,19 @@ class CoronaLiveCrawler:
         soup = BeautifulSoup(html, "html.parser")
         div = soup.find_all(name="div", text="실시간 확진자수")
         curr = int(div[0].parent.contents[1].contents[0].contents[0].text.replace(",", ""))
-        delta_color = div[0].parent.contents[1].contents[2].attrs["color"]
-        delta = int(div[0].parent.contents[1].contents[2].text.replace(",", ""))
-        if delta_color == "#5673EB":
-            # Negative delta value
-            delta = -delta
-        if delta > 0:
-            delta = "+" + str(delta)
-        else:
-            delta = str(delta)
+        try:
+            delta_color = div[0].parent.contents[1].contents[2].attrs["color"]
+            delta = int(div[0].parent.contents[1].contents[2].text.replace(",", ""))
+            if delta_color == "#5673EB":
+                # Negative delta value
+                delta = -delta
+            if delta > 0:
+                delta = "+" + str(delta)
+            else:
+                delta = str(delta)
+        except IndexError:
+            # Same as yesterday
+            delta = 0
         return curr, delta
 
     async def run(self):
