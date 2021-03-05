@@ -1,10 +1,12 @@
+"""Corona-Live website crawler"""
 import asyncio
-from datetime import datetime, timedelta
-from worker import Worker
-from selenium import webdriver
-from bs4 import BeautifulSoup
-import time
 import traceback
+from datetime import datetime, timedelta
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
+
+from worker import Worker
 
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
@@ -14,6 +16,8 @@ driver = webdriver.Chrome("./chromedriver", chrome_options=options)
 
 
 class CoronaLiveCrawler:
+    """Corona live website crawler task"""
+
     def __init__(self, worker: Worker):
         self.worker = worker
         self.latest = 0
@@ -41,28 +45,26 @@ class CoronaLiveCrawler:
         return curr, delta
 
     async def run(self):
+        """Task runner"""
         while True:
             curr_time = datetime.today().strftime("%H:%M")
             success = False
             try:
                 curr, delta = await self._get_current()
                 diff = curr - self.latest
-                print(f"{curr_time}: {curr}")
                 if self.latest < curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(
-                        msg=f"[Realtime] 확진자 수 변동: *{curr}* (+{diff}) (어제 대비 {delta})"
-                    )
+                    await self.worker.send(msg=f"[실시간] 확진자 수 변동: *{curr}* (+{diff}) (어제 대비 {delta})")
                     self.latest = curr
                 if self.latest > curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[Realtime] 확진자 수 변동: *{curr}* (어제 대비 {delta})")
+                    await self.worker.send(msg=f"[실시간] 확진자 수 변동: *{curr}* (어제 대비 {delta})")
                     self.latest = curr
                 success = True
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)
-                await self.worker.test_send(msg=f"[Realtime] {curr_time} corona-live-bot error!")
+                await self.worker.test_send(msg=f"[실시간] {curr_time} corona-live-bot error!")
                 await self.worker.test_send(msg=f"{err}")
 
             if success:

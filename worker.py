@@ -2,7 +2,8 @@ from discord import Client, Guild, TextChannel, Message
 
 
 class Worker:
-    def __init__(self, client: Client):
+    def __init__(self, client: Client, debug: bool = False):
+        self.debug = debug
         for guild in client.guilds:
             if guild.name == "minty-botworld":
                 self.minty_botworld: Guild = guild
@@ -19,6 +20,8 @@ class Worker:
     async def send(self, msg, channel=None):
         if channel is None:
             channel = self.maple_channel
+        if self.debug:
+            channel = self.test_channel
         self.latest_message = await channel.send(msg)
 
     async def test_send(self, msg):
