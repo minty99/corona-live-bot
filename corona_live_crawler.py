@@ -54,17 +54,17 @@ class CoronaLiveCrawler:
                 diff = curr - self.latest
                 if self.latest < curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[실시간] 확진자 수 변동: *{curr}* (+{diff}) (어제 대비 {delta})")
+                    await self.worker.send(msg=f"확진자 수 변동: *{curr}* (+{diff}) (어제 대비 {delta})")
                     self.latest = curr
                 if self.latest > curr:
                     await self.worker.delete_latest()
-                    await self.worker.send(msg=f"[실시간] 확진자 수 변동: *{curr}* (어제 대비 {delta})")
+                    await self.worker.send(msg=f"확진자 수 변동: *{curr}* (어제 대비 {delta})")
                     self.latest = curr
                 success = True
             except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)
-                await self.worker.test_send(msg=f"[실시간] {curr_time} corona-live-bot error!")
+                await self.worker.test_send(msg=f"{curr_time} corona-live-bot error!")
                 await self.worker.test_send(msg=f"{err}")
 
             if success:
