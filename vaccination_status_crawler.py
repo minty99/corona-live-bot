@@ -51,6 +51,7 @@ class VaccinationStatusCrawler:
             try:
                 total, today = await self._get_current()
                 if total > self.latest:
+                    await self.worker.delete_latest()
                     await self.worker.send(msg=f"백신 접종 현황: *{total:,}* (+{today:,})")
                     self.latest = total
                 success = True
