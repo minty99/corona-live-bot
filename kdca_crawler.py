@@ -68,7 +68,7 @@ class KdcaCrawler:
                 await asyncio.sleep(30)
                 continue
             return new_domestic, new_foreign, cum_total, cum_foreign
-        raise "[KdcaCrawler] Failed to fetch today's official announcement."
+        raise ValueError("[KdcaCrawler] Failed to fetch today's official announcement.")
 
     async def run(self):
         """Task runner"""
@@ -82,23 +82,20 @@ class KdcaCrawler:
         while True:
             today = datetime.today()
             yesterday = (today - timedelta(days=1)).strftime("%Y.%m.%d")
-            success = False
             try:
                 new_domestic, new_foreign, cum_total, cum_foreign = await self._get_current(today.month, today.day)
                 new_total = new_domestic + new_foreign
                 await self.worker.send(
                     msg=f"{yesterday}\n신규 확진자 수: *{new_total}* ({new_domestic} + {new_foreign})\n누적 확진자 수: {cum_total} ({cum_total - cum_foreign} + {cum_foreign})"
                 )
-                success = True
             except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)
                 await self.worker.test_send(msg=f"{yesterday} kdca_crawler error!")
                 await self.worker.test_send(msg=f"{err}")
 
-            if success:
-                next_day = datetime.today() + timedelta(days=1)
-                next_day = next_day.replace(hour=9, minute=0, second=0, microsecond=0)
-                sleep_sec = (next_day - datetime.today()).total_seconds() + 1
-                print(f"[KdcaCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
-                await asyncio.sleep(sleep_sec)
+            next_day = datetime.today() + timedelta(days=1)
+            next_day = next_day.replace(hour=9, minute=0, second=0, microsecond=0)
+            sleep_sec = (next_day - datetime.today()).total_seconds() + 1
+            print(f"[KdcaCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
+            await asyncio.sleep(sleep_sec)

@@ -48,7 +48,6 @@ class CoronaLiveCrawler:
         """Task runner"""
         while True:
             curr_time = datetime.today().strftime("%H:%M")
-            success = False
             try:
                 curr, delta = await self._get_current()
                 diff = curr - self.latest
@@ -60,16 +59,14 @@ class CoronaLiveCrawler:
                     await self.worker.delete_latest()
                     await self.worker.send(msg=f"확진자 수 변동: *{curr}* (어제 대비 {delta})")
                     self.latest = curr
-                success = True
             except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)
                 await self.worker.test_send(msg=f"{curr_time} corona-live-bot error!")
                 await self.worker.test_send(msg=f"{err}")
 
-            if success:
-                next_hour = datetime.today() + timedelta(hours=1)
-                next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
-                sleep_sec = (next_hour - datetime.today()).total_seconds() + 1
-                print(f"[CoronaLiveCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
-                await asyncio.sleep(sleep_sec)
+            next_hour = datetime.today() + timedelta(hours=1)
+            next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
+            sleep_sec = (next_hour - datetime.today()).total_seconds() + 1
+            print(f"[CoronaLiveCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
+            await asyncio.sleep(sleep_sec)

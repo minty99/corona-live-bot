@@ -47,23 +47,20 @@ class VaccinationStatusCrawler:
         while True:
             today = datetime.today()
             yesterday = (today - timedelta(days=1)).strftime("%Y.%m.%d")
-            success = False
             try:
                 total, today = await self._get_current()
                 if total > self.latest:
                     await self.worker.delete_latest()
                     await self.worker.send(msg=f"백신 접종 현황: *{total:,}* (+{today:,})")
                     self.latest = total
-                success = True
             except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)
                 await self.worker.test_send(msg=f"{yesterday} vaccination_status_crawler error!")
                 await self.worker.test_send(msg=f"{err}")
 
-            if success:
-                next_hour = datetime.today() + timedelta(hours=1)
-                next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
-                sleep_sec = (next_hour - datetime.today()).total_seconds() + 1
-                print(f"[VaccinationStatusCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
-                await asyncio.sleep(sleep_sec)
+            next_hour = datetime.today() + timedelta(hours=1)
+            next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
+            sleep_sec = (next_hour - datetime.today()).total_seconds() + 1
+            print(f"[VaccinationStatusCrawler] Bot will sleep for {sleep_sec:.3f} seconds.")
+            await asyncio.sleep(sleep_sec)
