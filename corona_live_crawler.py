@@ -24,14 +24,13 @@ class CoronaLiveCrawler:
 
     async def _get_current(self):
         driver.get("https://www.corona-live.com/")
-        await asyncio.sleep(10)
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
-        div = soup.find_all(name="div", text="실시간 확진자수")
-        curr = int(div[0].parent.contents[1].contents[0].contents[0].text.replace(",", ""))
+        div = soup.find_all(name="div", text="오늘 확진자수")
+        curr = int(div[0].parent.contents[1].contents[0].contents[0].replace(",", ""))
         try:
-            delta_color = div[0].parent.contents[1].contents[2].attrs["color"]
-            delta = int(div[0].parent.contents[1].contents[2].text.replace(",", ""))
+            delta_color = div[0].parent.parent.contents[2].contents[0].contents[1].contents[0].attrs["color"]
+            delta = int(div[0].parent.parent.contents[2].contents[0].contents[1].contents[0].text.replace(",", ""))
             if delta_color == "#5673EB":
                 # Negative delta value
                 delta = -delta

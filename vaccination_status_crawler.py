@@ -23,11 +23,14 @@ class VaccinationStatusCrawler:
         self.latest = 0
 
     async def _get_current(self):
-        driver.get("http://ncv.kdca.go.kr/content/vaccination.html?menu_cd=0201")
+        driver.get("http://ncv.kdca.go.kr/mainStatus.es?mid=a11702000000")
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         text = (
-            [item.text for item in soup.select("#content > div > div:nth-child(2) > table > tbody")][0]
+            [
+                item.text
+                for item in soup.select("#wrap > div.container > div:nth-child(1) > div:nth-child(3) > table > tbody")
+            ][0]
             .strip()
             .split("\n")
         )
