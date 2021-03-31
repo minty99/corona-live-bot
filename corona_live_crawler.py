@@ -24,6 +24,7 @@ class CoronaLiveCrawler:
 
     async def _get_current(self):
         driver.get("https://www.corona-live.com/")
+        await asyncio.sleep(10)
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         div = soup.find_all(name="div", text="오늘 확진자수")
