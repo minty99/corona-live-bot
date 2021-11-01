@@ -1,6 +1,7 @@
 """KDCA website crawler"""
 import asyncio
 import re
+import textwrap
 import traceback
 from datetime import datetime, timedelta
 
@@ -24,11 +25,14 @@ class KdcaCrawler:
         self.latest = 0
 
     async def _get_current(self, month, day):
-        while datetime.today().hour < 11:
+        while True:
             driver.get("http://www.kdca.go.kr/board/board.es?mid=a20501000000&bid=0015")
             html = driver.page_source
             soup = BeautifulSoup(html, "html.parser")
-            items = [item.text for item in soup.select("#listView > ul > li.title.title2 > a > span")]
+            items = [
+                item.text
+                for item in soup.select("#listView > ul > li.title.title2 > a > span")
+            ]
 
             answer_idx = -1
             for idx, item in enumerate(items):
@@ -55,20 +59,55 @@ class KdcaCrawler:
             target_page.click()
             html = driver.page_source
             soup = BeautifulSoup(html, "html.parser")
-            items = [item.text for item in soup.select("#content_detail > div.tstyle_view.bd2 > div.tb_contents > p")]
-            regex = ".*국내.*\\s([0-9,]+)명.*해외.*\\s([0-9,]+)명.*누적.*\\s([0-9,]+)명.*해외.*\\s([0-9,]+)명.*"
-            p = re.compile(regex)
+            items = [
+                item.text
+                for item in soup.select(
+                    "#content_detail > div.tstyle_view.bd2 > div.tb_contents > p"
+                )
+            ]
+            patient_regex = ".*국내.*\\s([0-9,]+)명.*해외.*\\s([0-9,]+)명.*신규.*\\s([0-9,]+)명.*누적.*\\s([0-9,]+)명.*해외.*\\s([0-9,]+)명.*"
+            vaccine_regex = (
+                ".*1차 접종.*\\s([0-9,]+)명.*\\s([0-9,]+)명.*\\s([0-9,]+)명.*\\s([0-9,]+)명.*"
+            )
+            p1 = re.compile(patient_regex)
+            p2 = re.compile(vaccine_regex)
+            ok1 = False
+            ok2 = False
             for item in items:
-                m = p.findall(item)
-                if len(m) == 1:
+                m1 = p1.findall(item)
+                m2 = p2.findall(item)
+                if not ok1 and len(m1) == 1:
                     # matched!
-                    new_domestic, new_foreign, cum_total, cum_foreign = [int(x.replace(",", "")) for x in m[0]]
+                    new_domestic, new_foreign, new_total, cum_total, cum_foreign = [
+                        int(x.replace(",", "")) for x in m1[0]
+                    ]
+                    ok1 = True
+                if not ok2 and len(m2) == 1:
+                    # matched!
+                    new_v1, cum_v1, new_v2, cum_v2 = [
+                        int(x.replace(",", "")) for x in m2[0]
+                    ]
+                    ok2 = True
+                if ok1 and ok2:
                     break
             else:
+                if datetime.today().hour >= 11:
+                    break
                 await asyncio.sleep(30)
                 continue
-            return new_domestic, new_foreign, cum_total, cum_foreign
-        raise ValueError("[KdcaCrawler] Failed to fetch today's official announcement.")
+            return (
+                new_domestic,
+                new_foreign,
+                cum_total,
+                cum_foreign,
+                new_v1,
+                cum_v1,
+                new_v2,
+                cum_v2,
+            )
+        raise ValueError(
+            "[KdcaCrawler] Failed to fetch today's official announcement. (Time over)"
+        )
 
     async def run(self):
         """Task runner"""
@@ -83,11 +122,26 @@ class KdcaCrawler:
             today = datetime.today()
             yesterday = (today - timedelta(days=1)).strftime("%Y.%m.%d")
             try:
-                new_domestic, new_foreign, cum_total, cum_foreign = await self._get_current(today.month, today.day)
+                (
+                    new_domestic,
+                    new_foreign,
+                    cum_total,
+                    cum_foreign,
+                    new_v1,
+                    cum_v1,
+                    new_v2,
+                    cum_v2,
+                ) = await self._get_current(today.month, today.day)
                 new_total = new_domestic + new_foreign
-                await self.worker.send(
-                    msg=f"{yesterday}\n신규 확진자 수: *{new_total}* ({new_domestic} + {new_foreign})\n누적 확진자 수: {cum_total} ({cum_total - cum_foreign} + {cum_foreign})"
-                )
+                msg = f"""
+                    {yesterday}
+                    신규 확진자 수: *{new_total:,}* ({new_domestic:,} + {new_foreign:,})
+                    누적 확진자 수: {cum_total:,} ({cum_total - cum_foreign:,} + {cum_foreign:,})
+                    1차 접종: {cum_v1:,} (+{new_v1:,})
+                    접종 완료: {cum_v2:,} (+{new_v2:,})
+                """
+                msg = textwrap.dedent(msg)
+                await self.worker.send(msg=msg)
             except Exception:  # pylint: disable=broad-except
                 err = traceback.format_exc()
                 print(err)

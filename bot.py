@@ -23,8 +23,8 @@ async def on_ready():
         client.loop.create_task(corona_live_crawler.run())
         kdca_crawler = KdcaCrawler(Worker(client, debug=args.debug))
         client.loop.create_task(kdca_crawler.run())
-        vaccine_status_crawler = VaccinationStatusCrawler(Worker(client, debug=args.debug))
-        client.loop.create_task(vaccine_status_crawler.run())
+        # vaccine_status_crawler = VaccinationStatusCrawler(Worker(client, debug=args.debug))
+        # client.loop.create_task(vaccine_status_crawler.run())
 
 
 parser = ArgumentParser(description="Corona live bot.")
